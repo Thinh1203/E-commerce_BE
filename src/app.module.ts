@@ -6,9 +6,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { ProductsModule } from './products/products.module';
 import { ProductController } from './product/product.controller';
 import { ProductModule } from './product/product.module';
+import { Product } from './product/entities/product.entity';
+import { Variant } from './product/entities/variant.entity';
+import { Thumbnail } from './product/entities/thumbnail.entity';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { Tag } from './product/entities/tag.entity';
 
 
 @Module({
@@ -21,14 +25,15 @@ import { ProductModule } from './product/product.module';
     username: process.env.USER_NAME,
     password: process.env.PASSWORD,
     database: process.env.DATABASE_NAME,
-    entities: [User],
+    entities: [User, Product, Variant, Thumbnail, Tag],
     synchronize: true,
   }),
   UserModule,
   AuthModule,
   ConfigModule,
-  ProductsModule,
-  ProductModule
+  ProductModule,
+  ProductModule,
+  CloudinaryModule
   ],
   controllers: [AppController, ProductController],
   providers: [AppService],
