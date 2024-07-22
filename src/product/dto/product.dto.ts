@@ -12,4 +12,7 @@ export class ProductDto {
 
     @IsNotEmpty()
     category: string;
+
+    @IsNotEmpty()
+    tagId: number[];
 }

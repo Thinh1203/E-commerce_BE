@@ -3,9 +3,6 @@ import { IsNotEmpty } from "class-validator";
 export class VariantDto {
     @IsNotEmpty()
     SKU: string;
-    
-    @IsNotEmpty()
-    images: string;
 
     @IsNotEmpty()
     price: number;

@@ -15,9 +15,6 @@ export class Tag {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // @ManyToOne(() => Product, (product) => product.tag)
-  // product?: Product;
-
   @ManyToMany(() => Product, (products) => products.tags)
   @JoinTable({
     name: 'product_tag',
