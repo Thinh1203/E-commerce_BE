@@ -13,6 +13,9 @@ import { Variant } from './product/entities/variant.entity';
 import { Thumbnail } from './product/entities/thumbnail.entity';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { Tag } from './product/entities/tag.entity';
+import { TagModule } from './tag/tag.module';
+import { ProductService } from './product/product.service';
+import { VariantModule } from './variant/variant.module';
 
 
 @Module({
@@ -32,10 +35,11 @@ import { Tag } from './product/entities/tag.entity';
   AuthModule,
   ConfigModule,
   ProductModule,
-  ProductModule,
-  CloudinaryModule
+  CloudinaryModule,
+  TagModule,
+  VariantModule
   ],
-  controllers: [AppController, ProductController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}

@@ -1,43 +1,78 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { Repository } from 'typeorm';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { Variant } from './entities/variant.entity';
+import { In, Repository } from 'typeorm';
 import { ProductDto } from './dto/product.dto';
+import { Tag } from './entities/tag.entity';
 
 @Injectable()
 export class ProductService {
-    // constructor(
-        // @InjectRepository(Product)
-        // private productRepository: Repository<Product>,
-        // @InjectRepository(Variant)
-        // private variantRepository: Repository<Variant>,
-        // private cloudinaryService: CloudinaryService
-    // ){}
+    constructor(
+        @InjectRepository(Product)
+        private productsRepository: Repository<Product>,
+        @InjectRepository(Tag)
+        private tagsRepository: Repository<Tag>
+    ) {}
 
-    // async addProduct(productDto:any, variantDto: any, files: Express.Multer.File[]) {
+    async addProduct(productDto: ProductDto) : Promise<Product> {
+        const checkProduct = await this.productsRepository.findOne({
+            where:{
+                name:productDto.name
+                }
+            });
+        if (checkProduct) {
+            throw new HttpException("Product's name already exists", HttpStatus.CONFLICT);
+        }
+        
+        const tags = await this.tagsRepository.findBy({id: In([productDto.tagId])});
+        
+        
+        if (tags.length !== productDto.tagId.length) {
+            throw new HttpException("Tags not found!", HttpStatus.NOT_FOUND);
+        }
+        const newProduct = this.productsRepository.create({
+            ...productDto,
+            tags: tags 
+        });
+        
+        await this.productsRepository.save(newProduct);
+    
+        return newProduct;
+    }
+
+    async updateProduct(id: number, productDto: ProductDto) : Promise<Product> {
+        const checkProduct = await this.productsRepository.findOne({ where: {id}, relations: ['tags']});
        
-    //     const imagesUpload = files.map((file, index) => {
-    //         if (index === 0) {
-    //             return this.cloudinaryService.uploadFile(file, 800, 800);
-    //         } else {
-    //             return this.cloudinaryService.uploadFile(file, 300, 300);
-    //         }
-    //     });
-    //     const uploadResults = await Promise.all(imagesUpload);
+        if (!checkProduct) {
+            throw new HttpException("Product not found!", HttpStatus.NOT_FOUND);
+        }
+        
+        let newTags = [];
+        if (productDto.tagId && productDto.tagId.length > 0) {
+            newTags = await this.tagsRepository.findBy({id: In([productDto.tagId])});
+        }
 
-    // }
+        checkProduct.name = productDto.name;
+        checkProduct.description = productDto.description;
+        checkProduct.user_gender = productDto.user_gender;
+        checkProduct.category = productDto.category;
+        checkProduct.tags = newTags;
+        
+        await this.productsRepository.save(checkProduct);
 
-    // async addProduct(productDto: ProductDto) : Promise<Product> {
-    //     const checkProduct = await this.productRepository.findOne({
-    //         where:{
-    //             name:productDto.name
-    //             }
-    //         });
-    //     if (checkProduct) {
-    //         throw new HttpException("Product's name already exists", HttpStatus.CONFLICT);
-    //     }
-    //     return this.productRepository.save(productDto);
-    // }
+    return checkProduct;
+    }
+
+    async getAllProduct() {
+        return await this.productsRepository.find({relations: ['tags', 'variant', 'variant.thumbnail']});
+    } 
+
+    async getOneProduct(id: number) {
+        return await this.productsRepository.findOne(
+            {
+                where: {id},
+                relations: ['tags']
+            }
+        );
+    } 
 }

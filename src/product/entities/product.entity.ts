@@ -28,9 +28,6 @@ export class Product {
   @OneToMany(() => Variant, (variant) => variant.product)
   variant?: Variant[];
 
-  // @OneToMany(() => Tag, (tag) => tag.product)
-  // tag?: Tag[];
-
   @ManyToMany(() => Tag, (tags) => tags.products)
   @JoinTable({
     name: 'product_tag',
