@@ -1,4 +1,4 @@
-import { IsNotEmpty } from "class-validator";
+import { IsInt, IsNotEmpty, Min } from "class-validator";
 
 export class VariantDto {
     @IsNotEmpty()
@@ -7,7 +7,8 @@ export class VariantDto {
     @IsNotEmpty()
     price: number;
 
-    @IsNotEmpty()
+    @IsInt()
+    @Min(0)
     stock_quantity: number;
 
     @IsNotEmpty()
@@ -19,6 +20,7 @@ export class VariantDto {
     @IsNotEmpty()
     material: string;
 
-    @IsNotEmpty()
+    @IsInt()
+    @Min(0)
     productId: number;
 }

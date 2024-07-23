@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Put, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
 
 import { Response } from 'express';
 import { ProductService } from './product.service';
 import { ProductDto } from './dto/product.dto';
 import { ProductFilterDto } from './dto/product-filter.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { AdminGuard } from 'src/auth/auth.admin.guard';
 
 @Controller('product')
 export class ProductController {
@@ -13,6 +15,7 @@ export class ProductController {
 
 
     @Post()
+    // @UseGuards(AuthGuard, AdminGuard)
     async addProduct(
         @Body() productDto : ProductDto,
         @Res() res: Response
@@ -21,7 +24,7 @@ export class ProductController {
             const newProduct = await this.productService.addProduct(productDto);
             return res.status(HttpStatus.CREATED).json({
                 code: HttpStatus.CREATED,
-                message: 'Added product successfully',
+                message: 'Product added successfully',
                 data: newProduct
             });
         } catch (error) {
