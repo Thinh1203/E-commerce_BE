@@ -20,12 +20,8 @@ export class AuthGuard implements CanActivate {
       });
 
       request['user'] = payload;
-      // console.log(payload);
       
       
-      if (payload.role !== 'admin') {
-        throw new UnauthorizedException();
-      }
     } catch {
       throw new UnauthorizedException();
     }

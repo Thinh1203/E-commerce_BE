@@ -72,7 +72,6 @@ export class ProductService {
             {
                 take: items_per_page,
                 skip: skip,
-
                 where: {
                     is_delete: false,
                     ...(query.search && {

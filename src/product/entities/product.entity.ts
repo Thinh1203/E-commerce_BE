@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { Variant } from './variant.entity';
 import { Tag } from './tag.entity';
+import { OrderItem } from 'src/order/entities/orderItem.entity';
 
 @Entity()
 export class Product {
@@ -30,6 +31,9 @@ export class Product {
 
   @OneToMany(() => Variant, (variant) => variant.product)
   variant?: Variant[];
+
+  // @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
+  // orderItem?: OrderItem[];
 
   @ManyToMany(() => Tag, (tags) => tags.products)
   @JoinTable({

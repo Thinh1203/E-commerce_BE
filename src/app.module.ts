@@ -16,6 +16,9 @@ import { Tag } from './product/entities/tag.entity';
 import { TagModule } from './tag/tag.module';
 import { ProductService } from './product/product.service';
 import { VariantModule } from './variant/variant.module';
+import { OrderModule } from './order/order.module';
+import { Order } from './order/entities/order.entity';
+import { OrderItem } from './order/entities/orderItem.entity';
 
 
 @Module({
@@ -28,7 +31,7 @@ import { VariantModule } from './variant/variant.module';
     username: process.env.USER_NAME,
     password: process.env.PASSWORD,
     database: process.env.DATABASE_NAME,
-    entities: [User, Product, Variant, Thumbnail, Tag],
+    entities: [User, Product, Variant, Thumbnail, Tag, Order, OrderItem],
     synchronize: true,
   }),
   UserModule,
@@ -37,7 +40,8 @@ import { VariantModule } from './variant/variant.module';
   ProductModule,
   CloudinaryModule,
   TagModule,
-  VariantModule
+  VariantModule,
+  OrderModule
   ],
   controllers: [AppController],
   providers: [AppService],
