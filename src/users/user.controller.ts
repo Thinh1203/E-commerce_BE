@@ -1,7 +1,9 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Query, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { UserFilterDto } from './dto/user-filter.dto';
+import { Response } from 'express';
 
 @Controller('user')
 export class UserController {
@@ -10,8 +12,20 @@ export class UserController {
 
     @UseGuards(AuthGuard)
     @Get()
-    getAllUser(): Promise<User[]> {
-        return this.userService.getAllUser();
+    async getAllUser(@Res() res: Response, @Query() query: UserFilterDto) {
+        try {
+            const listUser = await this.userService.getAllUser(query);
+            return res.status(HttpStatus.OK).json({
+                code: HttpStatus.OK,
+                message: 'List user',
+                data: listUser
+            });
+        } catch (error) {
+            return res.status(HttpStatus.BAD_REQUEST).json({
+                code: HttpStatus.BAD_GATEWAY,
+                message: error.message
+            });
+        }
     }
     
     @UseGuards(AuthGuard)
