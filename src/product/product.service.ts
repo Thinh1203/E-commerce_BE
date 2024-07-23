@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { In, Repository } from 'typeorm';
+import { In, IsNull, Like, Not, Repository } from 'typeorm';
 import { ProductDto } from './dto/product.dto';
 import { Tag } from './entities/tag.entity';
+import { ProductFilterDto } from './dto/product-filter.dto';
 
 @Injectable()
 export class ProductService {
@@ -63,8 +64,33 @@ export class ProductService {
     return checkProduct;
     }
 
-    async getAllProduct() {
-        return await this.productsRepository.find({relations: ['tags', 'variant', 'variant.thumbnail']});
+    async getAllProduct(query: ProductFilterDto) {
+        const items_per_page = query.items_per_page || 10;
+        const page = Number(query.page) || 1;
+        const skip = (page - 1) * items_per_page;
+        const [res, total] = await this.productsRepository.findAndCount(
+            {
+                take: items_per_page,
+                skip: skip,
+
+                where: {
+                    is_delete: false,
+                    ...(query.search && {
+                        name: Like(`%${query.search}%`),
+                    })
+                },
+                relations: ['tags', 'variant', 'variant.thumbnail']
+            });
+        const last_page = Math.ceil(total/items_per_page);
+        const prev_page = page - 1 < 1 ? null : page - 1;
+        const next_page = page + 1 > last_page ? null : page + 1;
+        return {
+            total,
+            data: res,
+            prev_page,
+            next_page,
+            last_page
+        }
     } 
 
     async getOneProduct(id: number) {
@@ -75,4 +101,16 @@ export class ProductService {
             }
         );
     } 
+
+    async deleteOneProduct(id: number) {
+        const checkProduct = await this.productsRepository.findOne({where: {id}});
+        if(!checkProduct) {
+            throw new HttpException("Product not found!", HttpStatus.NOT_FOUND);
+        }
+        return await this.productsRepository.createQueryBuilder()
+            .update(Product)
+            .set({ is_delete: true })
+            .where("id = :id", {id})
+            .execute();
+    }
 }

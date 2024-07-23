@@ -1,8 +1,9 @@
-import { Body, Controller, HttpStatus, Post, Res, UploadedFile, UploadedFiles, UseInterceptors  } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Param, Post, Put, Query, Res, UploadedFile, UploadedFiles, UseInterceptors  } from '@nestjs/common';
 import { VariantService } from './variant.service';
 import { VariantDto } from './dto/variant.dto';
 import { Response } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
+
 
 @Controller('variant')
 export class VariantController {
@@ -21,7 +22,7 @@ export class VariantController {
             const newProductVariant = await this.variantService.addProductVariant(variantDto, files);
             return res.status(HttpStatus.CREATED).json({
                 code: HttpStatus.CREATED,
-                message: 'Added variant successfully',
+                message: 'Added successfully',
                 data: newProductVariant
             });
         } catch (error) {
@@ -30,6 +31,36 @@ export class VariantController {
                 message: error.message,
             });    
         }
-      
+    }
+
+    @Put(':id')
+    // @UseInterceptors(FilesInterceptor('files', 5))
+    async updateProductVariant(
+        // @UploadedFiles() files: Express.Multer.File[],
+        @Param('id') id: string, 
+        @Body() variantDto: VariantDto,
+        @Res() res: Response
+    ) {
+        try {
+            const result = await this.variantService.updateProductVariant(Number(id), variantDto);
+                return res.status(HttpStatus.OK).json({
+                    code: HttpStatus.CREATED,
+                    message: 'Updated successfully',
+                    data: result
+                });
+            // if(files.length > 0) {
+
+            //     return res.status(HttpStatus.OK).json({
+            //         code: HttpStatus.CREATED,
+            //         message: 'Updated successfully',
+            //         data: newProductVariant
+            //     });
+            // }
+        } catch (error) {
+            return res.status(HttpStatus.BAD_REQUEST).json({
+                code: HttpStatus.BAD_REQUEST,
+                message: error.message,
+            });  
+        }
     }
 }

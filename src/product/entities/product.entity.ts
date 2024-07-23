@@ -19,6 +19,9 @@ export class Product {
   @Column()
   category: string;
 
+  @Column({ default: false })
+  is_delete: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

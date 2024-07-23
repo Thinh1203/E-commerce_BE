@@ -61,4 +61,33 @@ export class VariantService {
 
         return newVariantProduct;
     }
+
+    async updateProductVariant(id: number, data: VariantDto) {
+        const checkProductVariant = await this.variantRepository.findOne({where: {id}});
+        if(!checkProductVariant) {
+            throw new HttpException("Variant not found!", HttpStatus.NOT_FOUND);
+        }
+        const checkProduct = await this.productRepository.findOne({
+            where: { id: data.productId }
+        });
+   
+        if (!checkProduct) {
+            throw new HttpException("Product not found!", HttpStatus.NOT_FOUND);
+        }
+        return await this.variantRepository.createQueryBuilder()
+        .update(Variant)
+        .set({
+            SKU: data.SKU,
+            images: checkProductVariant.images,
+            stock_quantity: data.stock_quantity,
+            color: data.color,
+            size: data.size,
+            material: data.material,
+            price: data.price,
+            product: checkProduct
+        })
+        .where("id = :id", {id})
+        .execute();
+    }
+    
 }
