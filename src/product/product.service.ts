@@ -5,6 +5,7 @@ import { In, IsNull, Like, Not, Repository } from 'typeorm';
 import { ProductDto } from './dto/product.dto';
 import { Tag } from './entities/tag.entity';
 import { ProductFilterDto } from './dto/product-filter.dto';
+import { Category } from 'src/category/entities/category.entity';
 
 @Injectable()
 export class ProductService {
@@ -12,7 +13,9 @@ export class ProductService {
         @InjectRepository(Product)
         private productsRepository: Repository<Product>,
         @InjectRepository(Tag)
-        private tagsRepository: Repository<Tag>
+        private tagsRepository: Repository<Tag>,
+        @InjectRepository(Category)
+        private categoriesRepository: Repository<Category>
     ) {}
 
     async addProduct(productDto: ProductDto) : Promise<Product> {
@@ -25,14 +28,21 @@ export class ProductService {
             throw new HttpException("Product's name already exists", HttpStatus.CONFLICT);
         }
         
+        const checkCategory = await this.categoriesRepository.findOne({where: {id: productDto.categoryId}});
+
+        if (!checkCategory) {
+            throw new HttpException("Category not found", HttpStatus.CONFLICT);
+        }
+
         const tags = await this.tagsRepository.findBy({id: In([productDto.tagId])});
-        
         
         if (tags.length !== productDto.tagId.length) {
             throw new HttpException("Tags not found!", HttpStatus.NOT_FOUND);
         }
+
         const newProduct = this.productsRepository.create({
             ...productDto,
+            category: checkCategory,
             tags: tags 
         });
         
@@ -47,6 +57,12 @@ export class ProductService {
         if (!checkProduct) {
             throw new HttpException("Product not found!", HttpStatus.NOT_FOUND);
         }
+
+        const checkCategory = await this.categoriesRepository.findOne({where: {id}});
+
+        if (!checkCategory) {
+            throw new HttpException("Category not found!", HttpStatus.NOT_FOUND);
+        }
         
         let newTags = [];
         if (productDto.tagId && productDto.tagId.length > 0) {
@@ -56,7 +72,7 @@ export class ProductService {
         checkProduct.name = productDto.name;
         checkProduct.description = productDto.description;
         checkProduct.user_gender = productDto.user_gender;
-        checkProduct.category = productDto.category;
+        checkProduct.category = checkCategory;
         checkProduct.tags = newTags;
         
         await this.productsRepository.save(checkProduct);
@@ -68,6 +84,7 @@ export class ProductService {
         const items_per_page = query.items_per_page || 10;
         const page = Number(query.page) || 1;
         const skip = (page - 1) * items_per_page;
+
         const [res, total] = await this.productsRepository.findAndCount(
             {
                 take: items_per_page,
@@ -76,9 +93,41 @@ export class ProductService {
                     is_delete: false,
                     ...(query.search && {
                         name: Like(`%${query.search}%`),
-                    })
+                    }),
+                    category: {
+                        id: query.categoryId
+                    },
+                    variant: {
+                        colors: {
+                            id: query.colorId
+                        },
+                        sizes: {
+                            id: query.sizeId
+                        }
+                    }
                 },
-                relations: ['tags', 'variant', 'variant.thumbnail']
+                relations: ['tags', 'variant', 'variant.thumbnail', 'category', 'variant.colors', 'variant.sizes'],
+                select: {
+                    id: true, name: true, description: true, user_gender: true, is_delete: true,
+                    tags: {
+                        id: true, name: true
+                    },
+                    variant: {
+                        id: true, SKU: true, images: true, price: true, stock_quantity: true, material: true,
+                        thumbnail: {
+                            id: true, thumbnail: true
+                        },
+                        colors: {
+                            id: true, name: true
+                        },
+                        sizes: {
+                            id: true, name: true
+                        }
+                    },
+                    category: {
+                        id: true, name: true
+                    }
+                }
             });
         const last_page = Math.ceil(total/items_per_page);
         const prev_page = page - 1 < 1 ? null : page - 1;
@@ -96,7 +145,25 @@ export class ProductService {
         return await this.productsRepository.findOne(
             {
                 where: {id},
-                relations: ['tags']
+                relations: ['tags', 'variant', 'variant.thumbnail', 'variant.colors', 'variant.sizes'],
+                select: {
+                    id: true, name: true, description: true, user_gender: true, is_delete: true,
+                    tags: {
+                        id: true, name: true
+                    },
+                    variant: {
+                        id: true, SKU: true, images: true, price: true, stock_quantity: true, material: true,
+                        colors: {
+                            id: true, name: true
+                        },
+                        sizes: {
+                            id: true, name: true
+                        },
+                        thumbnail: {
+                            id: true, thumbnail: true
+                        }
+                    }
+                }
             }
         );
     } 

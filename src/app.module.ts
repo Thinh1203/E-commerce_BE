@@ -19,6 +19,12 @@ import { VariantModule } from './variant/variant.module';
 import { OrderModule } from './order/order.module';
 import { Order } from './order/entities/order.entity';
 import { OrderItem } from './order/entities/orderItem.entity';
+import { CategoryModule } from './category/category.module';
+import { Category } from './category/entities/category.entity';
+import { SizeModule } from './size/size.module';
+import { ColorModule } from './color/color.module';
+import { Color } from './color/entities/color.entity';
+import { Size } from './size/entities/size.entity';
 
 
 @Module({
@@ -31,7 +37,7 @@ import { OrderItem } from './order/entities/orderItem.entity';
     username: process.env.USER_NAME,
     password: process.env.PASSWORD,
     database: process.env.DATABASE_NAME,
-    entities: [User, Product, Variant, Thumbnail, Tag, Order, OrderItem],
+    entities: [User, Product, Variant, Thumbnail, Tag, Order, OrderItem, Category, Color, Size],
     synchronize: true,
   }),
   UserModule,
@@ -41,7 +47,10 @@ import { OrderItem } from './order/entities/orderItem.entity';
   CloudinaryModule,
   TagModule,
   VariantModule,
-  OrderModule
+  OrderModule,
+  CategoryModule,
+  SizeModule,
+  ColorModule
   ],
   controllers: [AppController],
   providers: [AppService],

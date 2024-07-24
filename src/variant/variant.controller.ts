@@ -48,14 +48,6 @@ export class VariantController {
                     message: 'Updated successfully',
                     data: result
                 });
-            // if(files.length > 0) {
-
-            //     return res.status(HttpStatus.OK).json({
-            //         code: HttpStatus.CREATED,
-            //         message: 'Updated successfully',
-            //         data: newProductVariant
-            //     });
-            // }
         } catch (error) {
             return res.status(HttpStatus.BAD_REQUEST).json({
                 code: HttpStatus.BAD_REQUEST,

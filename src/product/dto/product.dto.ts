@@ -11,7 +11,7 @@ export class ProductDto {
     user_gender: string;
 
     @IsNotEmpty()
-    category: string;
+    categoryId: number;
 
     @IsNotEmpty()
     tagId: number[];
