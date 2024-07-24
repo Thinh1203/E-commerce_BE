@@ -80,7 +80,7 @@ export class OrderController {
     }
 
     @Get()
-    @UseGuards(AuthGuard, AdminGuard)
+    // @UseGuards(AuthGuard, AdminGuard)
     async getAllOrder(@Res() res: Response,  @Query() query: OrderFilterDto) {
         try {
             const listOrder = await this.orderService.getAllOrder(query);

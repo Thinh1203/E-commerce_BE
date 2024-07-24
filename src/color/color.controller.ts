@@ -1,23 +1,23 @@
 import { Body, Controller, Get, HttpStatus, Post, Res } from '@nestjs/common';
-import { TagService } from './tag.service';
+import { ColorService } from './color.service';
 import { Response } from 'express';
-import { TagDto } from './dto/tag.dto';
+import { ColorDto } from './dto/color.dto';
 
-@Controller('tag')
-export class TagController {
+@Controller('color')
+export class ColorController {
     constructor(
-        private tagService: TagService
+        private colorService: ColorService
     ){}
 
     @Post()
-    async addTag(@Body() tagDto: TagDto, @Res() res: Response) {
+    async addTag(@Body() colorDto: ColorDto, @Res() res: Response) {
         try {
-            const newTag = await this.tagService.addTag(tagDto);
+            const newColor = await this.colorService.addColor(colorDto);
 
             return res.status(HttpStatus.CREATED).json({
                 code: HttpStatus.CREATED,
-                message: 'Tag added successfully',
-                data: newTag
+                message: 'Color added successfully',
+                data: newColor
             });
         } catch (error) {
             return res.status(HttpStatus.BAD_REQUEST).json({
@@ -29,12 +29,11 @@ export class TagController {
 
     @Get()
     async getAllTag(@Res() res: Response) {
-        const listTags = await this.tagService.getAllTag();
+        const listColors = await this.colorService.getAllColor();
         return res.status(HttpStatus.OK).json({
             code: HttpStatus.OK,
             message: 'Successfully!',
-            data: listTags
+            data: listColors
         });
     }
-    
 }

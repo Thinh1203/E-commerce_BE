@@ -12,10 +12,10 @@ export class VariantDto {
     stock_quantity: number;
 
     @IsNotEmpty()
-    color: string;
+    colorId: number;
 
     @IsNotEmpty()
-    size: string;
+    sizeId: number;
 
     @IsNotEmpty()
     material: string;

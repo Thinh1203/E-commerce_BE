@@ -34,7 +34,14 @@ export class OrderService {
         const orderItems: OrderItem[] = [];
         
         for(const element of orderDto.orderData) {
-            const checkProductVariant = await this.variantRepository.findOne({where: {id:Number(element.variantId)}});          
+            const checkProductVariant = await this.variantRepository.findOne({
+                where: {
+                    id: Number(element.variantId)
+                },
+                relations: ['colors', 'sizes']
+            }); 
+
+     
             if (!checkProductVariant) { 
                 throw new HttpException("Product not found!", HttpStatus.NOT_FOUND);
             }
@@ -43,14 +50,30 @@ export class OrderService {
             }
             const orderItemData = new OrderItem();
             orderItemData.variant = checkProductVariant;
-            orderItemData.color = checkProductVariant.color;
-            orderItemData.size = checkProductVariant.size;
             orderItemData.price = element.price;
             orderItemData.quantity = element.quantity;
+
+            const color = checkProductVariant.colors[0];
+            const size = checkProductVariant.sizes[0];
+
+
+            if (color) {
+                orderItemData.color = color.name;
+            } else {
+                throw new HttpException("Color not found!", HttpStatus.NOT_FOUND);
+            }
+
+            if (size) {
+                orderItemData.size = size.name;
+            } else {
+                throw new HttpException("Size not found!", HttpStatus.NOT_FOUND);
+            }
+
             orderItems.push(orderItemData);
             checkProductVariant.stock_quantity -= element.quantity;
             await this.variantRepository.save(checkProductVariant);
         }
+
         const order = this.orderRepository.create({
             user: checkUser,
             quantity : orderDto.quantity,
@@ -112,7 +135,8 @@ export class OrderService {
             skip: skip,
             where: {
                 is_delete: false
-            }
+            },
+            relations: ['orderItem']
         });
         const last_page = Math.ceil(total/items_per_page);
         const prev_page = page - 1 < 1 ? null : page - 1;
@@ -155,7 +179,6 @@ export class OrderService {
                             name: true,
                             description: true,
                             user_gender: true,
-                            category: true,
                             is_delete: true
                         }
                     }

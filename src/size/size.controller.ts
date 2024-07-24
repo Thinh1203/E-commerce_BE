@@ -1,23 +1,24 @@
 import { Body, Controller, Get, HttpStatus, Post, Res } from '@nestjs/common';
-import { TagService } from './tag.service';
 import { Response } from 'express';
-import { TagDto } from './dto/tag.dto';
+import { SizeService } from './size.service';
+import { SizeDto } from './dto/size.dto';
 
-@Controller('tag')
-export class TagController {
+
+@Controller('size')
+export class SizeController {
     constructor(
-        private tagService: TagService
+        private sizeService: SizeService
     ){}
 
     @Post()
-    async addTag(@Body() tagDto: TagDto, @Res() res: Response) {
+    async addTag(@Body() sizeDto: SizeDto, @Res() res: Response) {
         try {
-            const newTag = await this.tagService.addTag(tagDto);
+            const newSize = await this.sizeService.addSize(sizeDto);
 
             return res.status(HttpStatus.CREATED).json({
                 code: HttpStatus.CREATED,
-                message: 'Tag added successfully',
-                data: newTag
+                message: 'Size added successfully',
+                data: newSize
             });
         } catch (error) {
             return res.status(HttpStatus.BAD_REQUEST).json({
@@ -29,12 +30,13 @@ export class TagController {
 
     @Get()
     async getAllTag(@Res() res: Response) {
-        const listTags = await this.tagService.getAllTag();
+        const listSizes = await this.sizeService.getAllSize();
         return res.status(HttpStatus.OK).json({
             code: HttpStatus.OK,
             message: 'Successfully!',
-            data: listTags
+            data: listSizes
         });
     }
-    
 }
+
+

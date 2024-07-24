@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToMany, JoinTable, ManyToOne } from 'typeorm';
 import { Variant } from './variant.entity';
 import { Tag } from './tag.entity';
 import { OrderItem } from 'src/order/entities/orderItem.entity';
+import { Category } from 'src/category/entities/category.entity';
 
 @Entity()
 export class Product {
@@ -17,9 +18,6 @@ export class Product {
   @Column()
   user_gender: string;
 
-  @Column()
-  category: string;
-
   @Column({ default: false })
   is_delete: boolean;
 
@@ -32,8 +30,8 @@ export class Product {
   @OneToMany(() => Variant, (variant) => variant.product)
   variant?: Variant[];
 
-  // @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
-  // orderItem?: OrderItem[];
+  @ManyToOne(() => Category, (category) => category.product)
+  category?: Category;
 
   @ManyToMany(() => Tag, (tags) => tags.products)
   @JoinTable({
