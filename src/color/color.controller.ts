@@ -1,10 +1,11 @@
-import { Body, Controller, Get, HttpStatus, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ColorService } from './color.service';
 import { Response } from 'express';
 import { ColorDto } from './dto/color.dto';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AdminGuard } from 'src/auth/auth.admin.guard';
+import { ProductColorFilterDto } from './dto/color-filter.dto';
 
 
 @ApiTags('color')
@@ -40,12 +41,31 @@ export class ColorController {
     @Get()
     @ApiResponse({status: 200, description: 'Successfully'})
     @ApiResponse({status: 400, description: 'error'})
-    async getAllTag(@Res() res: Response) {
+    async getAllColor(@Res() res: Response) {
         const listColors = await this.colorService.getAllColor();
         return res.status(HttpStatus.OK).json({
             code: HttpStatus.OK,
             message: 'Successfully!',
             data: listColors
         });
+    }
+
+    @Get(':id')
+    @ApiResponse({status: 200, description: 'Successfully'})
+    @ApiResponse({status: 400, description: 'error'})
+    async getOneColor(@Res() res: Response, @Param('id') id: string,@Query() query : ProductColorFilterDto) {
+        try {
+        const result = await this.colorService.getOneColor(Number(id), query);
+        return res.status(HttpStatus.OK).json({
+            code: HttpStatus.OK,
+            message: 'Successfully!',
+            data: result
+        });
+        } catch (error) {
+            return res.status(HttpStatus.BAD_GATEWAY).json({
+                code: HttpStatus.BAD_REQUEST,
+                message: error.message
+            });
+        }
     }
 }
