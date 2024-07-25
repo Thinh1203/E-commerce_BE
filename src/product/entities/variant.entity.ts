@@ -25,6 +25,9 @@ export class Variant {
   @Column()
   material: string;
 
+  @Column({default: 0})
+  discount: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

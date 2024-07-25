@@ -7,6 +7,8 @@ import { OrderItem } from './entities/orderItem.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Variant } from 'src/product/entities/variant.entity';
 import { OrderFilterDto } from './dto/order-filter.dto';
+import { EmailService } from 'src/email/email.service';
+import { ProducerService } from 'src/queue/producer.service';
 
 @Injectable()
 export class OrderService {
@@ -18,7 +20,9 @@ export class OrderService {
         @InjectRepository(User)
         private userRepository: Repository<User>,
         @InjectRepository(Variant)
-        private variantRepository: Repository<Variant>
+        private variantRepository: Repository<Variant>,
+        private emailService: EmailService,
+        private producerService: ProducerService
     ){}
     
     async addOrder (orderDto: OrderDto, userId: number) {
@@ -26,7 +30,7 @@ export class OrderService {
         if(!checkUser) {
             throw new HttpException("User not found!", HttpStatus.NOT_FOUND);
         }
-
+        
         if(checkUser.points < orderDto.total_price) {
             throw new HttpException("The customer does not have enough points to pay", HttpStatus.BAD_REQUEST);
         }
@@ -38,7 +42,7 @@ export class OrderService {
                 where: {
                     id: Number(element.variantId)
                 },
-                relations: ['colors', 'sizes']
+                relations: ['colors', 'sizes', 'product']
             }); 
 
      
@@ -80,11 +84,10 @@ export class OrderService {
             total_price : orderDto.total_price,
             orderItem: orderItems
         });
-        const savedOrder = await this.orderRepository.save(order);
+        const savedOrder = await this.orderRepository.save(order); 
 
         for (const item of orderItems) {
-
-            item.order = savedOrder;
+            item.order = savedOrder;    
             await this.orderItemRepository.save(item);
         }
 
@@ -95,6 +98,27 @@ export class OrderService {
             .where("id = :id", {id: checkUser.id})
             .execute();
         
+        const orderList = savedOrder.orderItem.map(item => 
+            ` <p>Product: ${item.variant.product.name}</p>
+            <p>Price: ${item.price}</p>
+            <p>Color: ${item.color}</p>
+            <p>Size: ${item.size}</p>
+            <p>Quantity: ${item.quantity}</p>
+            <p>Total_price: ${item.price * item.quantity}</p>`);
+
+        const emailData = {
+            email: checkUser.email,
+            subject: 'Order Success',
+            html: `<p> <b>Order detail<b></p>
+                <p>quantity: ${savedOrder.quantity}</p>
+                <p>total priceL: ${savedOrder.total_price}$</p>
+                    <br>
+                <p><b>Items:</b></p>
+                ${orderList}`
+        }
+        // await this.producerService.addToEmailQueue(emailData);
+        const mail = await this.emailService.sendEmail(emailData);
+
         return {
             "quantity": savedOrder.quantity,
             "total_price": savedOrder.total_price,

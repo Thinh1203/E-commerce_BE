@@ -5,7 +5,10 @@ import { OrderService } from './order.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { OrderFilterDto } from './dto/order-filter.dto';
 import { AdminGuard } from 'src/auth/auth.admin.guard';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('order')
 @Controller('order')
 export class OrderController {
     constructor(
@@ -13,6 +16,8 @@ export class OrderController {
     ){}
 
     @Get('history')
+    @ApiResponse({status: 200, description: 'successfully'})
+    @ApiResponse({status: 400, description: 'error'})
     @UseGuards(AuthGuard)
     async getAllOrderHistory(@Res() res: Response, @Req() req: Request) {
         try {
@@ -35,10 +40,12 @@ export class OrderController {
     }
 
     @Post()
+    @ApiResponse({status: 200, description: 'order Successfully'})
+    @ApiResponse({status: 400, description: 'error'})
     @UseGuards(AuthGuard)
     async addOrder (
         @Body() orderDto: OrderDto,
-        @Res() res: Response,
+        @Res() res: Response,   
         @Req() req: Request
     ) {
         try {
@@ -59,6 +66,8 @@ export class OrderController {
     }
 
     @Patch(':id')
+    @ApiResponse({status: 200, description: 'delete Successfully'})
+    @ApiResponse({status: 400, description: 'error'})
     @UseGuards(AuthGuard)
     async deleteOrder(
         @Param('id') id: string,
@@ -80,7 +89,9 @@ export class OrderController {
     }
 
     @Get()
-    // @UseGuards(AuthGuard, AdminGuard)
+    @ApiResponse({status: 200, description: 'successfully'})
+    @ApiResponse({status: 400, description: 'error'})
+    @UseGuards(AuthGuard, AdminGuard)
     async getAllOrder(@Res() res: Response,  @Query() query: OrderFilterDto) {
         try {
             const listOrder = await this.orderService.getAllOrder(query);
@@ -98,6 +109,8 @@ export class OrderController {
     }
 
     @Get(':id')
+    @ApiResponse({status: 200, description: 'successfully'})
+    @ApiResponse({status: 400, description: 'error'})
     @UseGuards(AuthGuard)
     async getOneOrder (@Res() res: Response, @Param('id') id: string) {
         try {
