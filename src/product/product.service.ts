@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { In, IsNull, Like, Not, Repository } from 'typeorm';
+import { Between, In, IsNull, Like, Not, Repository } from 'typeorm';
 import { ProductDto } from './dto/product.dto';
 import { Tag } from './entities/tag.entity';
 import { ProductFilterDto } from './dto/product-filter.dto';
@@ -85,27 +85,39 @@ export class ProductService {
         const page = Number(query.page) || 1;
         const skip = (page - 1) * items_per_page;
 
-        const [res, total] = await this.productsRepository.findAndCount(
-            {
-                take: items_per_page,
-                skip: skip,
-                where: {
+        const whereCondition : any = {
                     is_delete: false,
                     ...(query.search && {
                         name: Like(`%${query.search}%`),
                     }),
-                    category: {
-                        id: query.categoryId
-                    },
-                    variant: {
+                    ...(query.categoryId && {
+                        category: {
+                            id: query.categoryId
+                        }
+                    }),
+                    ...(query.colorId && {
                         colors: {
-                            id: query.colorId
-                        },
+                            id: query.categoryId
+                        }
+                    }),
+                    ...(query.sizeId && {
                         sizes: {
                             id: query.sizeId
                         }
-                    }
-                },
+                    }),
+                }
+
+        if (query.from !== undefined && query.to !== undefined) {
+            whereCondition.variant = {
+                price: Between(query.from, query.to)
+            }
+        }
+       
+        const [res, total] = await this.productsRepository.findAndCount(
+            {
+                take: items_per_page,
+                skip: skip,
+                where: whereCondition,
                 relations: ['tags', 'variant', 'variant.thumbnail', 'category', 'variant.colors', 'variant.sizes'],
                 select: {
                     id: true, name: true, description: true, user_gender: true, is_delete: true,
@@ -113,7 +125,7 @@ export class ProductService {
                         id: true, name: true
                     },
                     variant: {
-                        id: true, SKU: true, images: true, price: true, stock_quantity: true, material: true,
+                        id: true, SKU: true, images: true, price: true, stock_quantity: true, material: true, discount: true,
                         thumbnail: {
                             id: true, thumbnail: true
                         },

@@ -6,7 +6,9 @@ import { ProductDto } from './dto/product.dto';
 import { ProductFilterDto } from './dto/product-filter.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AdminGuard } from 'src/auth/auth.admin.guard';
+import { ApiBearerAuth, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('product')
 @Controller('product')
 export class ProductController {
     constructor(
@@ -14,8 +16,11 @@ export class ProductController {
     ){}
 
 
+    @ApiBearerAuth()
     @Post()
-    // @UseGuards(AuthGuard, AdminGuard)
+    @ApiResponse({status: 201, description: 'add successfully'})
+    @ApiResponse({status: 400, description: 'error'})
+    @UseGuards(AuthGuard, AdminGuard)
     async addProduct(
         @Body() productDto : ProductDto,
         @Res() res: Response
@@ -35,7 +40,12 @@ export class ProductController {
         }
     }
 
+    @ApiBearerAuth()
     @Put(':id')
+    @ApiResponse({status: 201, description: 'update successfully'})
+    @ApiResponse({status: 404, description: 'product not found'})
+    @ApiResponse({status: 400, description: 'error'})
+    @UseGuards(AuthGuard, AdminGuard)
     async updateProduct (
         @Body() productDto : ProductDto,
         @Res() res: Response,
@@ -57,7 +67,17 @@ export class ProductController {
         }
     }
 
+    @ApiQuery({name: 'page', required: false})
+    @ApiQuery({name: 'items_per_page', required: false})
+    @ApiQuery({name: 'search', required: false})
+    @ApiQuery({name: 'categoryId', required: false})
+    @ApiQuery({name: 'sizeId', required: false})
+    @ApiQuery({name: 'colorId', required: false})
+    @ApiQuery({name: 'from', required: false})
+    @ApiQuery({name: 'to', required: false})
     @Get()
+    @ApiResponse({status: 200, description: 'successfully'})
+    @ApiResponse({status: 400, description: 'error'})
     async getAllProduct( @Res() res: Response, @Query() query: ProductFilterDto) {
         try {
             const listProduct = await this.productService.getAllProduct(query);
@@ -76,6 +96,9 @@ export class ProductController {
     }
     
     @Get(':id')
+    @ApiResponse({status: 200, description: 'successfully'})
+    @ApiResponse({status: 404, description: 'product not found'})
+    @ApiResponse({status: 400, description: 'error'})
     async getOneProduct(
         @Param('id') id: string,
         @Res() res: Response
@@ -95,7 +118,12 @@ export class ProductController {
         }
     }
 
+    @ApiBearerAuth()
     @Patch(':id')
+    @UseGuards(AuthGuard, AdminGuard)
+    @ApiResponse({status: 200, description: 'update Successfully'})
+    @ApiResponse({status: 404, description: 'product not found'})
+    @ApiResponse({status: 400, description: 'error'})
     async deleteOneProduct(
         @Res() res: Response,
         @Param('id') id: string,

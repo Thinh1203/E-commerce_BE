@@ -1,10 +1,14 @@
-import { Body, Controller, HttpStatus, Param, Post, Put, Query, Res, UploadedFile, UploadedFiles, UseInterceptors  } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Param, Post, Put, Query, Res, UploadedFile, UploadedFiles, UseGuards, UseInterceptors  } from '@nestjs/common';
 import { VariantService } from './variant.service';
 import { VariantDto } from './dto/variant.dto';
 import { Response } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { AdminGuard } from 'src/auth/auth.admin.guard';
 
-
+@ApiBearerAuth()
+@ApiTags('variant')
 @Controller('variant')
 export class VariantController {
     constructor(
@@ -12,6 +16,9 @@ export class VariantController {
     ){}
 
     @Post()
+    @ApiResponse({status: 200, description: 'successfully'})
+    @ApiResponse({status: 400, description: 'error'})
+    @UseGuards(AuthGuard, AdminGuard)
     @UseInterceptors(FilesInterceptor('files', 5))
     async addProduct(
         @UploadedFiles() files: Express.Multer.File[],
@@ -34,6 +41,10 @@ export class VariantController {
     }
 
     @Put(':id')
+    @ApiResponse({status: 200, description: 'successfully'})
+    @ApiResponse({status: 404, description: 'Variant not found'})
+    @ApiResponse({status: 400, description: 'error'})
+    @UseGuards(AuthGuard, AdminGuard)
     // @UseInterceptors(FilesInterceptor('files', 5))
     async updateProductVariant(
         // @UploadedFiles() files: Express.Multer.File[],
