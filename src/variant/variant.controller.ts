@@ -16,6 +16,29 @@ export class VariantController {
     ){}
 
     @Post()
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+		schema: {
+			type: 'object',
+			properties: {
+				SKU: { type: 'string'},
+				price: { type: 'number'},
+				stock_quantity: { type: 'number' },
+				material: { type: 'number' },
+                colorId: { type: 'number' },
+                sizeId: { type: 'number' },
+                productId: { type: 'number' },
+				files: {
+					type: 'array',
+                    items: {
+                        type: 'string',
+                        format: 'binary',
+                    }
+				},
+			},
+			required: ['SKU', 'price', 'stock_quantity', 'material', 'colorId', 'sizeId', 'productId', 'files'],
+		},
+	})
     @ApiResponse({status: 200, description: 'successfully'})
     @ApiResponse({status: 400, description: 'error'})
     @UseGuards(AuthGuard, AdminGuard)

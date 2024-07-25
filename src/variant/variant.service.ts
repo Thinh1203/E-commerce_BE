@@ -60,11 +60,12 @@ export class VariantService {
             }
         });
         const uploadResults = await Promise.all(imagesUpload);
-
+        
         const imageUrls = uploadResults.map(result => result.url);
+        
 
         const newVariantProduct = await this.variantRepository.save({
-            images: JSON.stringify(imageUrls[0]),
+            images: imageUrls[0],
             material: variantDto.material,
             price: variantDto.price,
             stock_quantity: variantDto.stock_quantity,

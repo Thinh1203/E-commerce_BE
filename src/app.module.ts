@@ -25,6 +25,7 @@ import { Color } from './color/entities/color.entity';
 import { Size } from './size/entities/size.entity';
 import { EmailModule } from './email/email.module';
 import { QueueModule } from './queue/queue.module';
+import { AppotaPayModule } from './appota-pay/appota-pay.module';
 
 
 @Module({
@@ -52,7 +53,8 @@ import { QueueModule } from './queue/queue.module';
   SizeModule,
   ColorModule,
   EmailModule,
-  QueueModule
+  QueueModule,
+  AppotaPayModule
   ],
   controllers: [AppController],
   providers: [AppService],

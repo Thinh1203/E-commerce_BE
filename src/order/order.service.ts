@@ -116,8 +116,8 @@ export class OrderService {
                 <p><b>Items:</b></p>
                 ${orderList}`
         }
-        // await this.producerService.addToEmailQueue(emailData);
-        const mail = await this.emailService.sendEmail(emailData);
+        await this.producerService.addToEmailQueue(emailData);
+        // const mail = await this.emailService.sendEmail(emailData);
 
         return {
             "quantity": savedOrder.quantity,
