@@ -32,9 +32,9 @@ import { AppotaPayModule } from './appota-pay/appota-pay.module';
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-    type: 'mysql',
-    host: 'localhost',
-    port: 3306,
+    type: process.env.TYPE as 'mysql',
+    host: process.env.HOST,
+    port: parseInt(process.env.PORT, 10),
     username: process.env.USER_NAME,
     password: process.env.PASSWORD,
     database: process.env.DATABASE_NAME,
