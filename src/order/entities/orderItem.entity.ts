@@ -8,7 +8,7 @@ export class OrderItem {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('decimal', { precision: 6, scale: 2 })
+  @Column()
   price: number;
 
   @Column()

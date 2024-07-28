@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Param, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -34,11 +34,16 @@ export class UserController {
         }
     }
     
+    @Get('token')
     @UseGuards(AuthGuard)
-    @Get(':id')
     @ApiResponse({status: 200, description: 'successfully'})
     @ApiResponse({status: 400, description: 'error'})
-    getOneCustomer(@Param('id') id: string): Promise<User> {
-        return this.userService.getOneUser(Number(id));
+    async getOneCustomer(@Param('id') id: string, @Res() res: Response, @Req() req: Request): Promise<any> {
+        const user = req['user'];
+        const result = await this.userService.getOneUser(Number(user.id));
+        return res.status(HttpStatus.OK).json({
+            code: HttpStatus.OK,
+            data: result
+            });
     }
 }

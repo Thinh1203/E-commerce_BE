@@ -51,6 +51,7 @@ export class OrderController {
         try {
             const user = req['user'];
             const newProduct = await this.orderService.addOrder(orderDto, Number(user.id));
+            
             return res.status(HttpStatus.CREATED).json({
                 code: HttpStatus.CREATED,
                 message: 'Order added successfully',

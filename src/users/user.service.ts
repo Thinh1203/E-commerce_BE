@@ -39,7 +39,9 @@ export class UserService {
         } 
     }
 
-    async getOneUser(id: number): Promise<User> {   
+    async getOneUser(id: number): Promise<User> { 
+   
+          
         return await this.userRepository.findOne({
             select:['id', 'firstName', 'lastName', 'email', 'isActive','createdAt','updatedAt', 'role', 'points'],
             where: {id}

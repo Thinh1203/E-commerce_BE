@@ -28,6 +28,10 @@ export class OrderDto {
     @IsNotEmpty()
     total_price: number;
 
+    @ApiProperty()
+    @IsNotEmpty()
+    payment_method: number;
+
     @ApiProperty({type: [ProductVariantDto]})
     @IsArray()
     @IsNotEmpty()
