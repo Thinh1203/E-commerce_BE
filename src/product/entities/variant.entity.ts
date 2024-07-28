@@ -16,7 +16,7 @@ export class Variant {
   @Column()
   images: string;
 
-  @Column('decimal', { precision: 6, scale: 2 })
+  @Column()
   price: number;
 
   @Column()

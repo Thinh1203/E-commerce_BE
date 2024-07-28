@@ -1,4 +1,4 @@
-import { Body, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Body, forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { OrderDto } from './dto/order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -9,6 +9,7 @@ import { Variant } from 'src/product/entities/variant.entity';
 import { OrderFilterDto } from './dto/order-filter.dto';
 import { EmailService } from 'src/email/email.service';
 import { ProducerService } from 'src/queue/producer.service';
+import { AppotaPayService } from 'src/appota-pay/appota-pay.service';
 
 @Injectable()
 export class OrderService {
@@ -21,8 +22,10 @@ export class OrderService {
         private userRepository: Repository<User>,
         @InjectRepository(Variant)
         private variantRepository: Repository<Variant>,
+        private producerService: ProducerService,
         private emailService: EmailService,
-        private producerService: ProducerService
+        @Inject(forwardRef(() => AppotaPayService))
+        private appotaPayService: AppotaPayService
     ){}
     
     async addOrder (orderDto: OrderDto, userId: number) {
@@ -30,11 +33,17 @@ export class OrderService {
         if(!checkUser) {
             throw new HttpException("User not found!", HttpStatus.NOT_FOUND);
         }
-        
-        if(checkUser.points < orderDto.total_price) {
-            throw new HttpException("The customer does not have enough points to pay", HttpStatus.BAD_REQUEST);
-        }
 
+        let paymentMethod = "";
+
+        if (orderDto.payment_method === 2) {
+            if(checkUser.points < orderDto.total_price) {
+                throw new HttpException("The customer does not have enough points to pay", HttpStatus.BAD_REQUEST);
+            }
+            paymentMethod = "point"
+        }
+        paymentMethod = "eWallet";
+        
         const orderItems: OrderItem[] = [];
         
         for(const element of orderDto.orderData) {
@@ -60,7 +69,6 @@ export class OrderService {
             const color = checkProductVariant.colors[0];
             const size = checkProductVariant.sizes[0];
 
-
             if (color) {
                 orderItemData.color = color.name;
             } else {
@@ -82,22 +90,15 @@ export class OrderService {
             user: checkUser,
             quantity : orderDto.quantity,
             total_price : orderDto.total_price,
-            orderItem: orderItems
+            orderItem: orderItems,
+            payment_method: paymentMethod
         });
         const savedOrder = await this.orderRepository.save(order); 
 
         for (const item of orderItems) {
             item.order = savedOrder;    
             await this.orderItemRepository.save(item);
-        }
-
-        const updateUserPoint = checkUser.points - order.total_price;
-        await this.userRepository.createQueryBuilder()
-            .update(User)
-            .set({points: updateUserPoint})
-            .where("id = :id", {id: checkUser.id})
-            .execute();
-        
+        }        
         const orderList = savedOrder.orderItem.map(item => 
             ` <p>Product: ${item.variant.product.name}</p>
             <p>Price: ${item.price}</p>
@@ -105,20 +106,52 @@ export class OrderService {
             <p>Size: ${item.size}</p>
             <p>Quantity: ${item.quantity}</p>
             <p>Total_price: ${item.price * item.quantity}</p>`);
-
+    
         const emailData = {
             email: checkUser.email,
             subject: 'Order Success',
             html: `<p> <b>Order detail<b></p>
                 <p>quantity: ${savedOrder.quantity}</p>
-                <p>total priceL: ${savedOrder.total_price}$</p>
+                <p>total price: ${savedOrder.total_price}$</p>
+                <p>payment method: ${savedOrder.payment_method}</p> 
                     <br>
                 <p><b>Items:</b></p>
                 ${orderList}`
         }
-        await this.producerService.addToEmailQueue(emailData);
-        // const mail = await this.emailService.sendEmail(emailData);
-
+       
+        
+        await this.emailService.sendEmail(emailData);
+        
+        if (orderDto.payment_method === 2) {
+            const updateUserPoint = checkUser.points - order.total_price;
+            await this.userRepository.createQueryBuilder()
+                .update(User)
+                .set({points: updateUserPoint})
+                .where("id = :id", {id: checkUser.id})
+                .execute();
+ 
+            return {
+                "quantity": savedOrder.quantity,
+                "total_price": savedOrder.total_price,
+                "orderItem" : savedOrder.orderItem.map(element => {
+                    return {
+                        "price": element.price,
+                        "color": element.color,
+                        "size": element.size,
+                        "quantity": element.quantity,
+                        "product": element.variant
+                    }
+                }),
+                "id": savedOrder.id,
+                "status": savedOrder.status,
+                "payment_method": savedOrder.payment_method,
+                "is_delete": savedOrder.is_delete,
+                "order_date": savedOrder.createdAt
+                };
+        }
+        
+        const dataResult = await this.appotaPayService.createTransaction(String(savedOrder.id), orderDto.total_price);
+        
         return {
             "quantity": savedOrder.quantity,
             "total_price": savedOrder.total_price,
@@ -133,8 +166,10 @@ export class OrderService {
             }),
             "id": savedOrder.id,
             "status": savedOrder.status,
+            "payment_method": savedOrder.payment_method,
             "is_delete": savedOrder.is_delete,
-            "order_date": savedOrder.createdAt
+            "order_date": savedOrder.createdAt,
+            "payment_url": dataResult.payment.url
         };
     }
 
@@ -229,5 +264,19 @@ export class OrderService {
                 status: 'delivered'
             }
         })
+    }
+
+    async processingReturnedResult (orderId: number) {
+        const checkOrder = await this.orderRepository.findOne({
+            where: {id: orderId}
+        });
+        if (!checkOrder) {
+            throw new HttpException("Order not found", HttpStatus.NOT_FOUND);
+        }
+        return await this.orderRepository.createQueryBuilder()
+        .update(Order)
+        .set({ payment_status: true })
+        .where("id = :id", { id: orderId})
+        .execute();
     }
 }

@@ -10,11 +10,17 @@ export class Order {
   @Column()
   quantity: number;
 
-  @Column('decimal', { precision: 6, scale: 2 })
+  @Column()
   total_price: number;
   
   @Column({ default: 'pending' })
   status: string;
+
+  @Column()
+  payment_method: string;
+
+  @Column({ default: false })
+  payment_status: boolean;
 
   @Column({ default: false })
   is_delete: boolean;

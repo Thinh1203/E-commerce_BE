@@ -22,6 +22,7 @@ export class ConsumerService implements OnModuleInit {
                         const content = JSON.parse(message.content.toString());
                         this.logger.log('Received message:', content);
                         await this.emailService.sendEmail(content);
+                        
                         channel.ack(message);
                     }
                 });
