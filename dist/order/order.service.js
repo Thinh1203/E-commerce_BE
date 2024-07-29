@@ -21,15 +21,13 @@ const orderItem_entity_1 = require("./entities/orderItem.entity");
 const user_entity_1 = require("../users/entities/user.entity");
 const variant_entity_1 = require("../product/entities/variant.entity");
 const email_service_1 = require("../email/email.service");
-const producer_service_1 = require("../queue/producer.service");
 const appota_pay_service_1 = require("../appota-pay/appota-pay.service");
 let OrderService = class OrderService {
-    constructor(orderRepository, orderItemRepository, userRepository, variantRepository, producerService, emailService, appotaPayService) {
+    constructor(orderRepository, orderItemRepository, userRepository, variantRepository, emailService, appotaPayService) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.userRepository = userRepository;
         this.variantRepository = variantRepository;
-        this.producerService = producerService;
         this.emailService = emailService;
         this.appotaPayService = appotaPayService;
     }
@@ -268,12 +266,11 @@ exports.OrderService = OrderService = __decorate([
     __param(1, (0, typeorm_1.InjectRepository)(orderItem_entity_1.OrderItem)),
     __param(2, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __param(3, (0, typeorm_1.InjectRepository)(variant_entity_1.Variant)),
-    __param(6, (0, common_1.Inject)((0, common_1.forwardRef)(() => appota_pay_service_1.AppotaPayService))),
+    __param(5, (0, common_1.Inject)((0, common_1.forwardRef)(() => appota_pay_service_1.AppotaPayService))),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        producer_service_1.ProducerService,
         email_service_1.EmailService,
         appota_pay_service_1.AppotaPayService])
 ], OrderService);

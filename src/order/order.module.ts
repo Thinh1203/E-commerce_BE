@@ -7,15 +7,16 @@ import { OrderItem } from './entities/orderItem.entity';
 import { Variant } from 'src/product/entities/variant.entity';
 import { User } from 'src/users/entities/user.entity';
 import { EmailModule } from 'src/email/email.module';
-import { QueueModule } from 'src/queue/queue.module';
+// import { QueueModule } from 'src/queue/queue.module';
 import { AppotaPayModule } from 'src/appota-pay/appota-pay.module';
 
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderItem, Variant, User]),
-    EmailModule, QueueModule, forwardRef(() => AppotaPayModule)
+    EmailModule, forwardRef(() => AppotaPayModule)
   ],
+  // QueueModule
   controllers: [OrderController],
   providers: [OrderService],
   exports: [OrderService]
