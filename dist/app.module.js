@@ -33,7 +33,6 @@ const color_module_1 = require("./color/color.module");
 const color_entity_1 = require("./color/entities/color.entity");
 const size_entity_1 = require("./size/entities/size.entity");
 const email_module_1 = require("./email/email.module");
-const queue_module_1 = require("./queue/queue.module");
 const appota_pay_module_1 = require("./appota-pay/appota-pay.module");
 let AppModule = class AppModule {
 };
@@ -64,7 +63,6 @@ exports.AppModule = AppModule = __decorate([
             size_module_1.SizeModule,
             color_module_1.ColorModule,
             email_module_1.EmailModule,
-            queue_module_1.QueueModule,
             appota_pay_module_1.AppotaPayModule
         ],
         controllers: [app_controller_1.AppController],

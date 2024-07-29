@@ -8,7 +8,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Variant } from 'src/product/entities/variant.entity';
 import { OrderFilterDto } from './dto/order-filter.dto';
 import { EmailService } from 'src/email/email.service';
-import { ProducerService } from 'src/queue/producer.service';
+// import { ProducerService } from 'src/queue/producer.service';
 import { AppotaPayService } from 'src/appota-pay/appota-pay.service';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class OrderService {
         private userRepository: Repository<User>,
         @InjectRepository(Variant)
         private variantRepository: Repository<Variant>,
-        private producerService: ProducerService,
+        // private producerService: ProducerService,
         private emailService: EmailService,
         @Inject(forwardRef(() => AppotaPayService))
         private appotaPayService: AppotaPayService

@@ -6,17 +6,15 @@ import { User } from 'src/users/entities/user.entity';
 import { Variant } from 'src/product/entities/variant.entity';
 import { OrderFilterDto } from './dto/order-filter.dto';
 import { EmailService } from 'src/email/email.service';
-import { ProducerService } from 'src/queue/producer.service';
 import { AppotaPayService } from 'src/appota-pay/appota-pay.service';
 export declare class OrderService {
     private orderRepository;
     private orderItemRepository;
     private userRepository;
     private variantRepository;
-    private producerService;
     private emailService;
     private appotaPayService;
-    constructor(orderRepository: Repository<Order>, orderItemRepository: Repository<OrderItem>, userRepository: Repository<User>, variantRepository: Repository<Variant>, producerService: ProducerService, emailService: EmailService, appotaPayService: AppotaPayService);
+    constructor(orderRepository: Repository<Order>, orderItemRepository: Repository<OrderItem>, userRepository: Repository<User>, variantRepository: Repository<Variant>, emailService: EmailService, appotaPayService: AppotaPayService);
     addOrder(orderDto: OrderDto, userId: number): Promise<{
         quantity: number;
         total_price: number;
